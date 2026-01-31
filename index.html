@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chindows 操作系统更新包下载</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #0066cc;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .official-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #0066cc;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .official-link:hover {
+            background-color: #0052a3;
+        }
+        
+        .update-list {
+            list-style: none;
+        }
+        
+        .update-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #0066cc;
+            transition: transform 0.2s;
+        }
+        
+        .update-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .update-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .update-date {
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .update-link {
+            margin-top: 8px;
+        }
+        
+        .update-link a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 14px;
+            border: 1px solid #0066cc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .update-link a:hover {
+            background-color: #0066cc;
+            color: #fff;
+        }
+        
+        .error-message {
+            color: #ff0000;
+            text-align: center;
+            padding: 20px;
+            background-color: #ffe6e6;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        
+        .loading-message {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chindows 操作系统更新包下载</h1>
+        
+        <div class="header">
+            <p>最新更新包列表</p>
+            <a href="https://lugui906.github.io/chin/" class="official-link" target="_blank">访问系统官网</a>
+        </div>
+        
+        <div id="loading" class="loading-message">加载更新列表中...</div>
+        <div id="error" class="error-message" style="display: none;"></div>
+        <ul id="updateList" class="update-list"></ul>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateList = document.getElementById('updateList');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            
+            fetch('update.txt')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('无法加载更新文件');
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    loading.style.display = 'none';
+                    
+                    // 解析update.txt文件内容
+                    const lines = text.split('\n');
+                    
+                    lines.forEach(line => {
+                        line = line.trim();
+                        if (line) {
+                            // 解析每行数据：名称 时间 链接
+                            const parts = line.split(' ');
+                            if (parts.length >= 3) {
+                                const name = parts[0];
+                                const date = parts[1];
+                                const link = parts.slice(2).join(' ');
+                                addUpdateItem(name, date, link);
+                            }
+                        }
+                    });
+                    
+                    // 检查是否有更新项
+                    if (updateList.children.length === 0) {
+                        error.textContent = '更新文件格式不正确或无更新内容';
+                        error.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    loading.style.display = 'none';
+                    error.textContent = '错误：' + err.message;
+                    error.style.display = 'block';
+                });
+            
+            function addUpdateItem(name, date, link) {
+                const li = document.createElement('li');
+                li.className = 'update-item';
+                li.innerHTML = `
+                    <div class="update-name">${name}</div>
+                    <div class="update-date">发布时间：${date}</div>
+                    <div class="update-link"><a href="${link}" target="_blank">下载更新包</a></div>
+                `;
+                updateList.appendChild(li);
+            }
+        });
+    </script>
+</body>
+</html>
